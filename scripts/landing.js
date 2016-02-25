@@ -1,9 +1,7 @@
+var pointsArray = document.getElementsByClassName('point');
+
 // animate the .selling-points via CSS transition
-var animatePoints = function() {
-
-  // get the elements
-  var points = document.getElementsByClassName('point');
-
+var animatePoints = function(points) {
   // set the time in ms that each point will wait before animating
   var delay = 50;
 
@@ -23,3 +21,17 @@ var animatePoints = function() {
   }
 };
 
+window.onload = function() {
+  if (window.innerHeight > 950) {
+    animatePoints(pointsArray);
+  }
+
+  var sellingPoints = document.getElementsByClassName("selling-points")[0];
+  var scrollDistance = sellingPoints.getBoundingClientRect().top - window.innerHeight + 200;
+
+  window.addEventListener("scroll", function(event) {
+    if (document.documentElement.scrollTop || document.body.scrollTop >= scrollDistance) {
+      animatePoints(pointsArray);
+    }
+  });
+}
