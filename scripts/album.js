@@ -28,6 +28,20 @@ var albumLifeAndDeath = {
   ]
 };
 
+var albumKnowByHeart = {
+  title: "Know by Heart",
+  artist: "American Analog Set",
+  label: "Tiger Style",
+  year: "2001",
+  albumArtUrl: "assets/images/album_covers/01.png",
+  songs: [
+    { title: "Punk as Fuck", duration: "4:09" },
+    { title: "The Only One", duration: "2:16" },
+    { title: "Like Foxes Through Fences", duration: "3:37" },
+    { title: "The Postman", duration: "2:59" },
+  ]
+};
+
 var createSongRow = function(songNumber, songName, songLength) {
   var template =
     '<tr class="album-view-song-item">'
@@ -61,4 +75,22 @@ var setCurrentAlbum = function(album) {
 
 window.onload = function() {
   setCurrentAlbum(albumAllHailWestTexas);
+
+  var albumImage = document.getElementsByClassName('album-cover-art')[0];
+  var albums = [albumAllHailWestTexas, albumLifeAndDeath, albumKnowByHeart];
+  var index = 0;
+
+  // listen for click on album cover
+  // when clicked cycle album object
+
+  albumImage.addEventListener("click", function(event) {
+    setCurrentAlbum(albums[index]);
+
+    // if the index reaches the end of our albums collection,
+    // start back at the top. Otheriwse, go to the next
+
+    (index == (albums.length - 1)) ? index = 0 : index++;
+  });
 };
+
+
