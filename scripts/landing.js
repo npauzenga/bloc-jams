@@ -18,6 +18,7 @@ var animatePoints = function(points) {
   }});
 };
 
+// animate the points immediately if the window is taller than 950px
 window.onload = function() {
   if (window.innerHeight > 950) {
     animatePoints(pointsArray);
