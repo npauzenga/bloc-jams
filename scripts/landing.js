@@ -5,17 +5,16 @@ var animatePoints = function(points) {
   // initial delay for first selling point transition
   var delay = 50;
 
-  // for each point in points, apply the IIFE to change style, delayed by delay
-  forEach({array: points, callback: function() {
-     (function revealPoint(i) {
+  // set styles on each point in points
+  // each point will animate later than the previous by the delay value
+  forEach({array: points, callback: function(point) {
       delay += 100;
       setTimeout(function() {
-        points[i].style.opacity = 1;
-        points[i].style.transform = "scaleX(1) translateY(0)";
-        points[i].style.msTransform = "scaleX(1) translateY(0)";
-        points[i].style.WebkitTransform = "scaleX(1) translateY(0)";
+        point.style.opacity = 1;
+        point.style.transform = "scaleX(1) translateY(0)";
+        point.style.msTransform = "scaleX(1) translateY(0)";
+        point.style.WebkitTransform = "scaleX(1) translateY(0)";
       }, delay);
-    })(i);
   }});
 };
 
