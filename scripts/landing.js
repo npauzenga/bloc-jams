@@ -2,25 +2,23 @@ var pointsArray = document.getElementsByClassName('point');
 
 // animate the .selling-points via CSS transition
 var animatePoints = function(points) {
-  // set the time in ms that each point will wait before animating
+  // initial delay for first selling point transition
   var delay = 50;
 
-  for(i = 0, j = points.length; i < j; i++) {
-    // each selling-point in points will display at different intervals
-    delay += 100;
-
-    // reveal each point after delay
-    (function revealPoint(i) {
+  // set styles on each point in points
+  // each point will animate later than the previous by the delay value
+  forEach({array: points, callback: function(point) {
+      delay += 100;
       setTimeout(function() {
-        points[i].style.opacity = 1;
-        points[i].style.transform = "scaleX(1) translateY(0)";
-        points[i].style.msTransform = "scaleX(1) translateY(0)";
-        points[i].style.WebkitTransform = "scaleX(1) translateY(0)";
+        point.style.opacity = 1;
+        point.style.transform = "scaleX(1) translateY(0)";
+        point.style.msTransform = "scaleX(1) translateY(0)";
+        point.style.WebkitTransform = "scaleX(1) translateY(0)";
       }, delay);
-    })(i);
-  }
+  }});
 };
 
+// animate the points immediately if the window is taller than 950px
 window.onload = function() {
   if (window.innerHeight > 950) {
     animatePoints(pointsArray);
