@@ -28,6 +28,20 @@ var albumLifeAndDeath = {
   ]
 };
 
+var albumKnowByHeart = {
+  title: "Know by Heart",
+  artist: "American Analog Set",
+  label: "Tiger Style",
+  year: "2001",
+  albumArtUrl: "assets/images/album_covers/01.png",
+  songs: [
+    { title: "Punk as Fuck", duration: "4:09" },
+    { title: "The Only One", duration: "2:16" },
+    { title: "Like Foxes Through Fences", duration: "3:37" },
+    { title: "The Postman", duration: "2:59" },
+  ]
+};
+
 var createSongRow = function(songNumber, songName, songLength) {
   var template =
     '<tr class="album-view-song-item">'
@@ -80,15 +94,22 @@ var findParentByClassName = function(targetClass, element) {
   }
 };
 
+// AF-315: Add a function to get the songItem by element
 var getSongItem = function(element) {
+  // summary:
+  //   Gets a song item based on a provided element
+  // element: Node
+  //   Element related to the song item node in some way
+  // returns: Node
   switch(element.className) {
+    // Purposefully falling through: Children of song-item-number
     case 'album-song-button':
     case 'ion-play':
     case 'ion-pause':
       return findParentByClassName('song-item-number', element);
-    case 'album-view-song-item':
+    case 'album-view-song-item': // falling through because parent
       return element.querySelector('.song-item-number');
-    case 'song-item-title':
+    case 'song-item-title':// falling through because sibling
     case 'song-item-duration':
       return findParentByClassName('album-view-song-item', element).querySelector('.song-item-number');
     case 'song-item-number':
@@ -125,6 +146,21 @@ var currentlyPlayingSong = null;
 window.onload = function() {
   setCurrentAlbum(albumAllHailWestTexas);
 
+  var albumImage = document.getElementsByClassName('album-cover-art')[0];
+  var albums = [albumAllHailWestTexas, albumLifeAndDeath, albumKnowByHeart];
+  var index = 0;
+
+  // listen for click on album cover
+  // when clicked cycle album object
+
+  albumImage.addEventListener("click", function(event) {
+    // if the index reaches the end of our albums collection,
+    // start back at the top. Otheriwse, go to the next
+    (index == (albums.length - 1)) ? index = 0 : index++;
+
+    setCurrentAlbum(albums[index]);
+  });
+
   // switch to play button when hovering over rows
   songListContainer.addEventListener('mouseover', function(event) {
     if (event.target.parentElement.className === 'album-view-song-item') {
@@ -135,6 +171,14 @@ window.onload = function() {
       }
     }
   });
+
+  // mouseleave does not bubble
+  // that's why there's a loop
+  // mouseout does bubble
+  // and acts in a very similar fashion
+  //
+  // homework: change the functions below to use event delegation:
+  // for both the mouseleave (which should be mouseout) and the click
 
   for (var i = 0, j = songRows.length; i < j; i++) {
     // switch back to track number when leaving row
@@ -154,3 +198,5 @@ window.onload = function() {
     });
   }
 };
+
+
