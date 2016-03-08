@@ -143,6 +143,8 @@ var pauseButtonTemplate = '<a class="album-song-button"><span class="ion-pause">
 
 var currentlyPlayingSong = null;
 
+var overSongItem = null;
+
 window.onload = function() {
   setCurrentAlbum(albumAllHailWestTexas);
 
@@ -164,10 +166,10 @@ window.onload = function() {
   // switch to play button when hovering over rows
   songListContainer.addEventListener('mouseover', function(event) {
     if (event.target.parentElement.className === 'album-view-song-item') {
-      var songItem = getSongItem(event.target);
+      overSongItem = getSongItem(event.target);
 
-      if (songItem.getAttribute('data-song-number') !== currentlyPlayingSong) {
-        songItem.innerHTML = playButtonTemplate;
+      if (overSongItem.getAttribute('data-song-number') !== currentlyPlayingSong) {
+        overSongItem.innerHTML = playButtonTemplate;
       }
     }
   });
@@ -180,23 +182,26 @@ window.onload = function() {
   // homework: change the functions below to use event delegation:
   // for both the mouseleave (which should be mouseout) and the click
 
-  for (var i = 0, j = songRows.length; i < j; i++) {
     // switch back to track number when leaving row
-    songRows[i].addEventListener('mouseleave', function(event) {
+  songListContainer.addEventListener('mouseout', function(event) {
+    if (event.target.parentElement.className === 'album-view-song-item') {
       var songItem = getSongItem(event.target);
       var songItemNumber = songItem.getAttribute('data-song-number');
 
       if (songItemNumber !== currentlyPlayingSong) {
-        songItem.innerHTML = songItemNumber;
+        console.log(event.relatedTarget, overSongItem);
+        if (event.relatedTarget !== songItem) {
+          songItem.innerHTML = songItemNumber;
+        }
       } else {
         songItem.innerHTML = pauseButtonTemplate;
       }
-    });
+    }
+  });
 
-    songRows[i].addEventListener('click', function(event) {
-      clickHandler(event.target);
-    });
-  }
+  songListContainer.addEventListener('click', function(event) {
+    clickHandler(event.target);
+  });
 };
 
 
