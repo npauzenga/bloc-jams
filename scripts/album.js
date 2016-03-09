@@ -65,20 +65,25 @@ var noParent = document.querySelector('html');
 var findParentByClassName = function(targetClass, element) {
   var currentParent = element.parentElement;
 
-  if (currentParent) {
-    while (currentParent.className && currentParent.className != targetClass) {
-      currentParent = currentParent.parentElement;
-    }
+  if (currentParent == null) {
+    return alert("no parent found");
+  }
 
+  if (currentParent.parentElement != null) {
     if (currentParent.className == targetClass) {
       return currentParent;
     } else {
-      alert("no parent found with that class name");
+      return findParentByClassName(targetClass, currentParent);
     }
   } else {
-    alert("no parent found");
+    return alert("no parent found with that class name");
   }
 };
+
+// no parent found with that class name
+console.log(findParentByClassName("test", child));
+// no parent found
+console.log(findParentByClassName("album-view-song-item", noParent));
 
 var getSongItem = function(element) {
   switch(element.className) {
