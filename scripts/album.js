@@ -62,6 +62,12 @@ var setCurrentAlbum = function(album) {
 var child = document.getElementsByClassName('album-view-title')[0];
 var noParent = document.querySelector('html');
 
+// summary:
+//   if an element has a parent with class name == targetClass, return that parent
+// input:
+//    takes an element and the the class name we're looking for
+// returns:
+//    the parent element that matches the class name
 var findParentByClassName = function(targetClass, element) {
   var currentParent = element.parentElement;
 
