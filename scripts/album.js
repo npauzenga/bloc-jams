@@ -94,7 +94,7 @@ var findParentByClassName = function(targetClass, element) {
   }
 };
 
-// AF-315: Add a function to get the songItem by element
+// Add a function to get the songItem by element
 var getSongItem = function(element) {
   // summary:
   //   Gets a song item based on a provided element
