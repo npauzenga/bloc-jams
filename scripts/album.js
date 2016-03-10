@@ -184,16 +184,17 @@ window.onload = function() {
 
     // switch back to track number when leaving row
   songListContainer.addEventListener('mouseout', function(event) {
+   // if the event's parent is the song-item store the song item and number
     if (event.target.parentElement.className === 'album-view-song-item') {
       var songItem = getSongItem(event.target);
       var songItemNumber = songItem.getAttribute('data-song-number');
 
+      // if the song we're leaving isn't the currently playing song
       if (songItemNumber !== currentlyPlayingSong) {
-        console.log(event.relatedTarget, overSongItem);
-        if (event.relatedTarget !== songItem) {
-          songItem.innerHTML = songItemNumber;
-        }
+        // change to the song number
+        songItem.innerHTML = songItemNumber;
       } else {
+        // otherwise show the pause button
         songItem.innerHTML = pauseButtonTemplate;
       }
     }
