@@ -1,47 +1,13 @@
-var albumAllHailWestTexas = {
-  title: "All Hail West Texas",
-  artist: "The Mountain Goats",
-  label: "Rough Trade",
-  year: "2001",
-  albumArtUrl: "assets/images/album_covers/01.png",
-  songs: [
-    { title: "Blue", duration: "4:26" },
-    { title: "Green", duration: "3:26" },
-    { title: "Red", duration: "4:16" },
-    { title: "Pink", duration: "4:24" },
-    { title: "Magenta", duration: "6:26" }
-  ]
-};
+/*****
+  Summary: Creates HTML for a row corresponding to a song in the album-view-song-list table.
+           Adds click and hover event handlers to the row.
 
-var albumLifeAndDeath = {
-  title: "Life and Death of an American Fourtracker",
-  artist: "John Vanderslice",
-  label: "Barsuk",
-  year: "2003",
-  albumArtUrl: "assets/images/album_covers/01.png",
-  songs: [
-    { title: "Blue", duration: "4:26" },
-    { title: "Green", duration: "3:26" },
-    { title: "Red", duration: "4:16" },
-    { title: "Pink", duration: "4:24" },
-    { title: "Magenta", duration: "6:26" }
-  ]
-};
+  Input:   songNumber -- an INT representing the the number of the song in the album
+           songName -- a STRING representing the name of the song
+           songLength -- a STRING representing the song's duration in minutes and seconds
 
-var albumKnowByHeart = {
-  title: "Know by Heart",
-  artist: "American Analog Set",
-  label: "Tiger Style",
-  year: "2001",
-  albumArtUrl: "assets/images/album_covers/01.png",
-  songs: [
-    { title: "Punk as Fuck", duration: "4:09" },
-    { title: "The Only One", duration: "2:16" },
-    { title: "Like Foxes Through Fences", duration: "3:37" },
-    { title: "The Postman", duration: "2:59" },
-  ]
-};
-
+  Return:  The completed song row element
+ ****/
 var createSongRow = function(songNumber, songName, songLength) {
   var template =
     '<tr class="album-view-song-item">'
@@ -58,22 +24,28 @@ var createSongRow = function(songNumber, songName, songLength) {
     var $songItemNumber = $songItem.attr('data-song-number');
 
     // if there isn't a song playing, set the clicked song item number to pause
-    if (currentlyPlayingSong === null) {
+    if (currentlyPlayingSongNumber === null) {
       $songItem.html(pauseButtonTemplate);
-      currentlyPlayingSong = $songItemNumber
+      currentlyPlayingSongNumber = $songItemNumber;
+      currentSongFromAlbum = currentAlbum.songs[currentlyPlayingSongNumber - 1];
+      updatePlayerBarSong();
 
     // if the song that's playing is the song we've clicked, change to play button
-    } else if (currentlyPlayingSong === $songItemNumber) {
+    } else if (currentlyPlayingSongNumber === $songItemNumber) {
       $songItem.html(playButtonTemplate);
-      currentlyPlayingSong = null;
+      currentlyPlayingSongNumber = null;
+      currentSongFromAlbum = null;
+      $('.main-controls .play-pause').html(playerBarPlayButton);
 
     // if the song that's playing is not the song we've clicked, change the clicked song's number
     // to pause button and change the previously playing song's pause button to number
-    } else if (currentlyPlayingSong !== $songItemNumber) {
-      var $currentlyPlayingSongElement = $('[data-song-number="' + currentlyPlayingSong + '"]');
+    } else if (currentlyPlayingSongNumber !== $songItemNumber) {
+      var $currentlyPlayingSongElement = $('[data-song-number="' + currentlyPlayingSongNumber + '"]');
       $currentlyPlayingSongElement.html($currentlyPlayingSongElement.attr('data-song-number'));
       $songItem.html(pauseButtonTemplate);
-      currentlyPlayingSong = $songItemNumber;
+      currentlyPlayingSongNumber = $songItemNumber;
+      currentSongFromAlbum = currentAlbum.songs[currentlyPlayingSongNumber - 1];
+      updatePlayerBarSong();
     }
   };
 
@@ -84,7 +56,7 @@ var createSongRow = function(songNumber, songName, songLength) {
     var $songItem = $(this).find(".song-item-number");
     var songItemNumber = $songItem.attr('data-song-number');
 
-    if (songItemNumber !== currentlyPlayingSong) {
+    if (songItemNumber !== currentlyPlayingSongNumber) {
       $songItem.html(playButtonTemplate);
     }
   };
@@ -93,7 +65,7 @@ var createSongRow = function(songNumber, songName, songLength) {
     var $songItem = $(this).find(".song-item-number");
     var songItemNumber = $songItem.attr('data-song-number');
 
-    if (songItemNumber !== currentlyPlayingSong) {
+    if (songItemNumber !== currentlyPlayingSongNumber) {
       $songItem.html(songItemNumber);
     }
   };
@@ -105,7 +77,17 @@ var createSongRow = function(songNumber, songName, songLength) {
   return $row;
 };
 
+/*****
+  Summary: Sets the album information at the top of the album view
+           Populates album-view-song-list with the album's songs via createSongRow()
+
+  Input:   album - an album object as defined in fixtures.js
+
+  Return:  Nothing
+ ****/
 var setCurrentAlbum = function(album) {
+  currentAlbum = album;
+
   var $albumTitle =       $('.album-view-title');
   var $albumArtist =      $('.album-view-artist');
   var $albumReleaseInfo = $('.album-view-release-info');
@@ -125,13 +107,89 @@ var setCurrentAlbum = function(album) {
   }
 };
 
+/*****
+  Summary: finds the index of the given song in the album's songs array
+
+  Input:   album - an album object as defined in fixtures.js
+           song - a song object as definted in fixtures.js
+
+  Return:  The index of the given song as an INT
+ ****/
+var trackIndex = function(album, song) {
+  return album.songs.indexOf(song);
+};
+
+/*****
+  Summary: Changes the song title, artist name, play/pause button,
+           and mobile display on the player bar
+
+  Input:   None
+
+  Return:  None
+ ****/
+var updatePlayerBarSong = function() {
+  var $songNameHeading = $('.currently-playing .song-name');
+  var $artistNameHeading = $('.currently-playing .artist-name');
+  var $artistSongMobileHeading = $('.currenly-playing .artist-song-mobile');
+
+  // change text to current song name
+  $songNameHeading.text(currentSongFromAlbum.title);
+  $artistNameHeading.text(currentAlbum.artist);
+  $artistSongMobileHeading.text(currentAlbum.artist + " " + currentSongFromAlbum.title);
+
+  $('.main-controls .play-pause').html(playerBarPauseButton);
+};
+
+/*****
+  Summary: Increment the index of the current song in the array
+
+  Input:   None
+
+  Return:  None
+ ****/
+var nextSong = function() {
+  var currentSongIndex = trackIndex(currentAlbum, currentSongFromAlbum);
+  var previousSongIndex = currentSongIndex;
+  currentSongIndex++;
+  console.log(currentSongIndex, previousSongIndex);
+
+  // update the previous song's number with a number
+  $('.song-item-number[data-song-number*="' + (previousSongIndex + 1) + '"]').html(previousSongIndex + 1);
+
+  // set new current song
+  currentlyPlayingSongNumber = currentSongIndex;
+  currentSongFromAlbum = currentAlbum.songs[currentSongIndex];
+
+  // set new song's .song-item-number with a pause button
+  $('.song-item-number[data-song-number*="' + currentSongIndex + '"]').html(pauseButtonTemplate);
+
+  // update player bar with new song
+  updatePlayerBarSong();
+};
+
+/*****
+  Summary: Decrement the index of the current song in the array
+
+  Input:   None
+
+  Return:  None
+ ****/
+var previousSong = function() {};
+
 var playButtonTemplate = '<a class="album-song-button"><span class="ion-play"></span></a>';
 var pauseButtonTemplate = '<a class="album-song-button"><span class="ion-pause"></span></a>';
+var playerBarPlayButton = '<span class="ion-play"></span>';
+var playerBarPauseButton = '<span class="ion-pause"></span>';
 
-var currentlyPlayingSong = null;
+var currentAlbum = null;
+var currentlyPlayingSongNumber = null;
+var currentSongFromAlbum = null;
+
+var $previousButton = $('.main-controls .previous');
+var $nextButton = $('.main-controls .next');
 
 $(document).ready(function() {
   setCurrentAlbum(albumAllHailWestTexas);
+  $previousButton.click(previousSong);
+  $nextButton.click(nextSong);
 });
-
-
