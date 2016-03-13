@@ -54,6 +54,7 @@ var createSongRow = function(songNumber, songName, songLength) {
   var $row = $(template);
 
   var clickHandler = function() {
+    // this should refer to the $row
     var $songItem = $(this).find('.song-item-number');
     var $songItemNumber = $songItem.attr('data-song-number');
 
