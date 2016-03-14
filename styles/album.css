@@ -81,6 +81,10 @@ body.album {
   line-height: 28px;
 }
 
+.hidden {
+  display: none;
+}
+
 @media (max-width: 40rem) and (min-width: 20rem) {
   .album-view-details {
     text-align: center;
