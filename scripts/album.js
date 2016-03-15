@@ -43,9 +43,13 @@ var albumKnowByHeart = {
 };
 
 var createSongRow = function(songNumber, songName, songLength) {
+  var playButtonTemplate = '<a class="album-song-button hidden"><span class="ion-play"></span></a>';
+  var pauseButtonTemplate = '<a class="album-song-button hidden"><span class="ion-pause"></span></a>';
+  var songNumberTemplate = '<span class="song-item-number" data-song-number="' + songNumber + '">' + songNumber + '</span>';
+
   var template =
     '<tr class="album-view-song-item">'
-  + ' <td class="song-item-number" data-song-number="' + songNumber + '">' + songNumber + '</td>'
+  + ' <td>' + songNumberTemplate + playButtonTemplate + pauseButtonTemplate + '</td>'
   + ' <td class="song-item-title">' + songName + '</td>'
   + ' <td class="song-item-duration">' + songLength + '</td>'
   + '</tr>'
@@ -57,22 +61,28 @@ var createSongRow = function(songNumber, songName, songLength) {
     var $songItem = $(this).find('.song-item-number');
     var $songItemNumber = $songItem.attr('data-song-number');
 
-    // if there isn't a song playing, set the clicked song item number to pause
+    // if there isn't a song playing, show the pause button
     if (currentlyPlayingSong === null) {
-      $songItem.html(pauseButtonTemplate);
+      // show pause button
+      $(this).find(".ion-pause").parent().toggleClass("hidden");
+      $(this).find(".ion-play").parent().toggleClass("hidden");
       currentlyPlayingSong = $songItemNumber
 
     // if the song that's playing is the song we've clicked, change to play button
     } else if (currentlyPlayingSong === $songItemNumber) {
-      $songItem.html(playButtonTemplate);
+      $(this).find(".ion-pause").parent().toggleClass("hidden");
+      $(this).find(".ion-play").parent().toggleClass("hidden");
       currentlyPlayingSong = null;
 
     // if the song that's playing is not the song we've clicked, change the clicked song's number
     // to pause button and change the previously playing song's pause button to number
     } else if (currentlyPlayingSong !== $songItemNumber) {
+      // get the currently playing song element
       var $currentlyPlayingSongElement = $('[data-song-number="' + currentlyPlayingSong + '"]');
-      $currentlyPlayingSongElement.html($currentlyPlayingSongElement.attr('data-song-number'));
-      $songItem.html(pauseButtonTemplate);
+      $currentlyPlayingSongElement.parent().find(".ion-pause").parent().addClass("hidden");
+      $currentlyPlayingSongElement.toggleClass("hidden");
+      $(this).find(".ion-pause").parent().toggleClass("hidden");
+      $(this).find(".ion-play").parent().toggleClass("hidden");
       currentlyPlayingSong = $songItemNumber;
     }
   };
@@ -85,7 +95,9 @@ var createSongRow = function(songNumber, songName, songLength) {
     var songItemNumber = $songItem.attr('data-song-number');
 
     if (songItemNumber !== currentlyPlayingSong) {
-      $songItem.html(playButtonTemplate);
+      // hide the number and unhide the play button
+      $(this).find(".song-item-number").toggleClass("hidden");
+      $(this).find(".ion-play").parent().toggleClass("hidden")
     }
   };
 
@@ -94,7 +106,8 @@ var createSongRow = function(songNumber, songName, songLength) {
     var songItemNumber = $songItem.attr('data-song-number');
 
     if (songItemNumber !== currentlyPlayingSong) {
-      $songItem.html(songItemNumber);
+      $(this).find(".song-item-number").toggleClass("hidden");
+      $(this).find(".ion-play").parent().toggleClass("hidden")
     }
   };
 
@@ -125,8 +138,6 @@ var setCurrentAlbum = function(album) {
   }
 };
 
-var playButtonTemplate = '<a class="album-song-button"><span class="ion-play"></span></a>';
-var pauseButtonTemplate = '<a class="album-song-button"><span class="ion-pause"></span></a>';
 
 var currentlyPlayingSong = null;
 
