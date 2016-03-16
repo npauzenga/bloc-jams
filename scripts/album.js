@@ -1,47 +1,13 @@
-var albumAllHailWestTexas = {
-  title: "All Hail West Texas",
-  artist: "The Mountain Goats",
-  label: "Rough Trade",
-  year: "2001",
-  albumArtUrl: "assets/images/album_covers/01.png",
-  songs: [
-    { title: "Blue", duration: "4:26" },
-    { title: "Green", duration: "3:26" },
-    { title: "Red", duration: "4:16" },
-    { title: "Pink", duration: "4:24" },
-    { title: "Magenta", duration: "6:26" }
-  ]
-};
+/*****
+  Summary: Creates HTML for a row corresponding to a song in the album-view-song-list table.
+           Adds click and hover event handlers to the row.
 
-var albumLifeAndDeath = {
-  title: "Life and Death of an American Fourtracker",
-  artist: "John Vanderslice",
-  label: "Barsuk",
-  year: "2003",
-  albumArtUrl: "assets/images/album_covers/01.png",
-  songs: [
-    { title: "Blue", duration: "4:26" },
-    { title: "Green", duration: "3:26" },
-    { title: "Red", duration: "4:16" },
-    { title: "Pink", duration: "4:24" },
-    { title: "Magenta", duration: "6:26" }
-  ]
-};
+  Input:   songNumber -- an INT representing the the number of the song in the album
+           songName -- a STRING representing the name of the song
+           songLength -- a STRING representing the song's duration in minutes and seconds
 
-var albumKnowByHeart = {
-  title: "Know by Heart",
-  artist: "American Analog Set",
-  label: "Tiger Style",
-  year: "2001",
-  albumArtUrl: "assets/images/album_covers/01.png",
-  songs: [
-    { title: "Punk as Fuck", duration: "4:09" },
-    { title: "The Only One", duration: "2:16" },
-    { title: "Like Foxes Through Fences", duration: "3:37" },
-    { title: "The Postman", duration: "2:59" },
-  ]
-};
-
+  Return:  The completed song row element
+ ****/
 var createSongRow = function(songNumber, songName, songLength) {
   var playButtonTemplate = '<a class="album-song-button hidden"><span class="ion-play"></span></a>';
   var pauseButtonTemplate = '<a class="album-song-button hidden"><span class="ion-pause"></span></a>';
@@ -59,31 +25,37 @@ var createSongRow = function(songNumber, songName, songLength) {
 
   var clickHandler = function() {
     var $songItem = $(this).find('.song-item-number');
-    var $songItemNumber = $songItem.attr('data-song-number');
+    var $songItemNumber = parseInt($songItem.attr('data-song-number'));
 
     // if there isn't a song playing, show the pause button
-    if (currentlyPlayingSong === null) {
+    if (currentlyPlayingSongNumber === null) {
       // show pause button
       $(this).find(".ion-pause").parent().toggleClass("hidden");
       $(this).find(".ion-play").parent().toggleClass("hidden");
-      currentlyPlayingSong = $songItemNumber
+      currentlyPlayingSongNumber = $songItemNumber;
+      currentSongFromAlbum = currentAlbum.songs[currentlyPlayingSongNumber - 1];
+      updatePlayerBarSong();
 
     // if the song that's playing is the song we've clicked, change to play button
-    } else if (currentlyPlayingSong === $songItemNumber) {
+    } else if (currentlyPlayingSongNumber === $songItemNumber) {
       $(this).find(".ion-pause").parent().toggleClass("hidden");
       $(this).find(".ion-play").parent().toggleClass("hidden");
-      currentlyPlayingSong = null;
+      currentlyPlayingSongNumber = null;
+      currentSongFromAlbum = null;
+      $('.main-controls .play-pause').html(playerBarPlayButton);
 
     // if the song that's playing is not the song we've clicked, change the clicked song's number
     // to pause button and change the previously playing song's pause button to number
-    } else if (currentlyPlayingSong !== $songItemNumber) {
+    } else if (currentlyPlayingSongNumber !== $songItemNumber) {
       // get the currently playing song element
-      var $currentlyPlayingSongElement = $('[data-song-number="' + currentlyPlayingSong + '"]');
+      var $currentlyPlayingSongElement = $('[data-song-number="' + currentlyPlayingSongNumber + '"]');
       $currentlyPlayingSongElement.parent().find(".ion-pause").parent().addClass("hidden");
       $currentlyPlayingSongElement.toggleClass("hidden");
       $(this).find(".ion-pause").parent().toggleClass("hidden");
       $(this).find(".ion-play").parent().toggleClass("hidden");
-      currentlyPlayingSong = $songItemNumber;
+      currentlyPlayingSongNumber = $songItemNumber;
+      currentSongFromAlbum = currentAlbum.songs[currentlyPlayingSongNumber- 1];
+      updatePlayerBarSong();
     }
   };
 
@@ -92,9 +64,9 @@ var createSongRow = function(songNumber, songName, songLength) {
     //   because we're calling onHover on $row, which represents "this" below
     //   and $row will always have a the same structure (see createSongRow)
     var $songItem = $(this).find(".song-item-number");
-    var songItemNumber = $songItem.attr('data-song-number');
+    var songItemNumber = parseInt($songItem.attr('data-song-number'));
 
-    if (songItemNumber !== currentlyPlayingSong) {
+    if (songItemNumber !== currentlyPlayingSongNumber) {
       // hide the number and unhide the play button
       $(this).find(".song-item-number").toggleClass("hidden");
       $(this).find(".ion-play").parent().toggleClass("hidden")
@@ -103,9 +75,9 @@ var createSongRow = function(songNumber, songName, songLength) {
 
   var offHover = function(event) {
     var $songItem = $(this).find(".song-item-number");
-    var songItemNumber = $songItem.attr('data-song-number');
+    var songItemNumber = parseInt($songItem.attr('data-song-number'));
 
-    if (songItemNumber !== currentlyPlayingSong) {
+    if (songItemNumber !== currentlyPlayingSongNumber) {
       $(this).find(".song-item-number").toggleClass("hidden");
       $(this).find(".ion-play").parent().toggleClass("hidden")
     }
@@ -118,7 +90,17 @@ var createSongRow = function(songNumber, songName, songLength) {
   return $row;
 };
 
+/*****
+  Summary: Sets the album information at the top of the album view
+           Populates album-view-song-list with the album's songs via createSongRow()
+
+  Input:   album - an album object as defined in fixtures.js
+
+  Return:  Nothing
+ ****/
 var setCurrentAlbum = function(album) {
+  currentAlbum = album;
+
   var $albumTitle =       $('.album-view-title');
   var $albumArtist =      $('.album-view-artist');
   var $albumReleaseInfo = $('.album-view-release-info');
@@ -138,11 +120,120 @@ var setCurrentAlbum = function(album) {
   }
 };
 
+/*****
+  Summary: finds the index of the given song in the album's songs array
 
-var currentlyPlayingSong = null;
+  Input:   album - an album object as defined in fixtures.js
+           song - a song object as definted in fixtures.js
+
+  Return:  The index of the given song as an INT
+ ****/
+var trackIndex = function(album, song) {
+  return album.songs.indexOf(song);
+};
+
+/*****
+  Summary: Changes the song title, artist name, play/pause button,
+           and mobile display on the player bar
+
+  Input:   None
+
+  Return:  None
+ ****/
+var updatePlayerBarSong = function() {
+  var $songNameHeading = $('.currently-playing .song-name');
+  var $artistNameHeading = $('.currently-playing .artist-name');
+  var $artistSongMobileHeading = $('.currenly-playing .artist-song-mobile');
+
+  // change text to current song name
+  $songNameHeading.text(currentSongFromAlbum.title);
+  $artistNameHeading.text(currentAlbum.artist);
+  $artistSongMobileHeading.text(currentAlbum.artist + " " + currentSongFromAlbum.title);
+
+  $('.main-controls .play-pause').html(playerBarPauseButton);
+};
+
+/*****
+  Summary: Increment the index of the current song in the array
+
+  Input:   None
+
+  Return:  None
+ ****/
+var nextSong = function() {
+  debugger;
+  var currentSongIndex = trackIndex(currentAlbum, currentSongFromAlbum); // returns 0-based index
+  var previousSongIndex = currentSongIndex;
+
+  // if the current song isn't the last one, increment. Otherwise wrap back to the first
+  if (currentSongIndex !== currentAlbum.songs.length - 1) {
+    currentSongIndex++;
+  } else {
+    currentSongIndex = 0;
+  }
+
+  // hide the pause button on the currently playing song
+  $('.song-item-number[data-song-number*="' + (currentlyPlayingSongNumber) + '"]').parent().find(".ion-pause").parent().addClass("hidden");
+  // show the index on the currently playing song
+  $('.song-item-number[data-song-number*="' + (currentlyPlayingSongNumber) + '"]').parent().html(currentlyPlayingSongNumber);
+
+  // set new currently playing song
+  currentlyPlayingSongNumber = currentSongIndex + 1;
+  currentSongFromAlbum = currentAlbum.songs[currentSongIndex];
+
+  // set new song's .song-item-number with a pause button
+  $('.song-item-number[data-song-number*="' + currentlyPlayingSongNumber + '"]').html(pauseButtonTemplate);
+
+  // update player bar with new song
+  updatePlayerBarSong();
+};
+
+/*****
+  Summary: Decrement the index of the current song in the array
+
+  Input:   None
+
+  Return:  None
+ ****/
+var previousSong = function() {
+  var currentSongIndex = trackIndex(currentAlbum, currentSongFromAlbum);
+  var previousSongIndex = currentSongIndex;
+
+  // if the current song isn't the first one, decrement. Otherwise wrap back to the last
+  if (currentSongIndex !== 0) {
+    currentSongIndex--;
+  } else {
+    currentSongIndex = currentAlbum.songs.length - 1;
+  }
+
+  // update the previous song's number with a number
+  $('.song-item-number[data-song-number*="' + (previousSongIndex + 1) + '"]').html(previousSongIndex + 1);
+
+  // set new current song
+  currentlyPlayingSongNumber = currentSongIndex + 1;
+  currentSongFromAlbum = currentAlbum.songs[currentSongIndex];
+
+  // set new song's .song-item-number with a pause button
+  $('.song-item-number[data-song-number*="' + currentlyPlayingSongNumber + '"]').html(pauseButtonTemplate);
+
+  // update player bar with new song
+  updatePlayerBarSong();
+};
+
+var playButtonTemplate = '<a class="album-song-button"><span class="ion-play"></span></a>';
+var pauseButtonTemplate = '<a class="album-song-button"><span class="ion-pause"></span></a>';
+var playerBarPlayButton = '<span class="ion-play"></span>';
+var playerBarPauseButton = '<span class="ion-pause"></span>';
+
+var currentAlbum = null;
+var currentlyPlayingSongNumber = null;
+var currentSongFromAlbum = null;
+
+var $previousButton = $('.main-controls .previous');
+var $nextButton = $('.main-controls .next');
 
 $(document).ready(function() {
   setCurrentAlbum(albumAllHailWestTexas);
+  $previousButton.click(previousSong);
+  $nextButton.click(nextSong);
 });
-
-
