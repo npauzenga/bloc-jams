@@ -24,22 +24,23 @@ var createSongRow = function(songNumber, songName, songLength) {
   var $row = $(template);
 
   var clickHandler = function() {
-    var $songItem = $(this).find('.song-item-number');
+    var $row = $(this);
+    var $songItem = $row.find('.song-item-number');
     var $songItemNumber = parseInt($songItem.attr('data-song-number'));
 
     // if there isn't a song playing, show the pause button
     if (currentlyPlayingSongNumber === null) {
       // show pause button
-      $(this).find(".ion-pause").parent().toggleClass("hidden");
-      $(this).find(".ion-play").parent().toggleClass("hidden");
+      $row.find(".ion-pause").parent().toggleClass("hidden");
+      $row.find(".ion-play").parent().toggleClass("hidden");
       currentlyPlayingSongNumber = $songItemNumber;
       currentSongFromAlbum = currentAlbum.songs[currentlyPlayingSongNumber - 1];
       updatePlayerBarSong();
 
     // if the song that's playing is the song we've clicked, change to play button
     } else if (currentlyPlayingSongNumber === $songItemNumber) {
-      $(this).find(".ion-pause").parent().toggleClass("hidden");
-      $(this).find(".ion-play").parent().toggleClass("hidden");
+      $row.find(".ion-pause").parent().toggleClass("hidden");
+      $row.find(".ion-play").parent().toggleClass("hidden");
       currentlyPlayingSongNumber = null;
       currentSongFromAlbum = null;
       $('.main-controls .play-pause').html(playerBarPlayButton);
@@ -51,8 +52,8 @@ var createSongRow = function(songNumber, songName, songLength) {
       var $currentlyPlayingSongElement = $('[data-song-number="' + currentlyPlayingSongNumber + '"]');
       $currentlyPlayingSongElement.parent().find(".ion-pause").parent().addClass("hidden");
       $currentlyPlayingSongElement.toggleClass("hidden");
-      $(this).find(".ion-pause").parent().toggleClass("hidden");
-      $(this).find(".ion-play").parent().toggleClass("hidden");
+      $row.find(".ion-pause").parent().toggleClass("hidden");
+      $row.find(".ion-play").parent().toggleClass("hidden");
       currentlyPlayingSongNumber = $songItemNumber;
       currentSongFromAlbum = currentAlbum.songs[currentlyPlayingSongNumber- 1];
       updatePlayerBarSong();
@@ -63,23 +64,25 @@ var createSongRow = function(songNumber, songName, songLength) {
     // we don't need to check that the parent element matches ".album-view-song-item"
     //   because we're calling onHover on $row, which represents "this" below
     //   and $row will always have a the same structure (see createSongRow)
-    var $songItem = $(this).find(".song-item-number");
+    var $row = $(this);
+    var $songItem = $row.find(".song-item-number");
     var songItemNumber = parseInt($songItem.attr('data-song-number'));
 
     if (songItemNumber !== currentlyPlayingSongNumber) {
       // hide the number and unhide the play button
-      $(this).find(".song-item-number").toggleClass("hidden");
-      $(this).find(".ion-play").parent().toggleClass("hidden")
+      $row.find(".song-item-number").toggleClass("hidden");
+      $row.find(".ion-play").parent().toggleClass("hidden")
     }
   };
 
   var offHover = function(event) {
-    var $songItem = $(this).find(".song-item-number");
+    var $row = $(this);
+    var $songItem = $row.find(".song-item-number");
     var songItemNumber = parseInt($songItem.attr('data-song-number'));
 
     if (songItemNumber !== currentlyPlayingSongNumber) {
-      $(this).find(".song-item-number").toggleClass("hidden");
-      $(this).find(".ion-play").parent().toggleClass("hidden")
+      $row.find(".song-item-number").toggleClass("hidden");
+      $row.find(".ion-play").parent().toggleClass("hidden")
     }
   };
 
@@ -161,7 +164,6 @@ var updatePlayerBarSong = function() {
   Return:  None
  ****/
 var nextSong = function() {
-  debugger;
   var currentSongIndex = trackIndex(currentAlbum, currentSongFromAlbum); // returns 0-based index
   var previousSongIndex = currentSongIndex;
 
@@ -173,16 +175,17 @@ var nextSong = function() {
   }
 
   // hide the pause button on the currently playing song
-  $('.song-item-number[data-song-number*="' + (currentlyPlayingSongNumber) + '"]').parent().find(".ion-pause").parent().addClass("hidden");
+  $('.song-item-number[data-song-number*="' + (currentlyPlayingSongNumber) + '"]').parent().find(".ion-pause").parent().toggleClass("hidden");
   // show the index on the currently playing song
-  $('.song-item-number[data-song-number*="' + (currentlyPlayingSongNumber) + '"]').parent().html(currentlyPlayingSongNumber);
+  $('.song-item-number[data-song-number*="' + (currentlyPlayingSongNumber) + '"]').parent().find(".song-item-number").toggleClass("hidden");
 
   // set new currently playing song
   currentlyPlayingSongNumber = currentSongIndex + 1;
   currentSongFromAlbum = currentAlbum.songs[currentSongIndex];
 
   // set new song's .song-item-number with a pause button
-  $('.song-item-number[data-song-number*="' + currentlyPlayingSongNumber + '"]').html(pauseButtonTemplate);
+  $('.song-item-number[data-song-number*="' + (currentlyPlayingSongNumber) + '"]').parent().find(".song-item-number").toggleClass("hidden");
+  $('.song-item-number[data-song-number*="' + (currentlyPlayingSongNumber) + '"]').parent().find(".ion-pause").parent().toggleClass("hidden");
 
   // update player bar with new song
   updatePlayerBarSong();
@@ -206,22 +209,23 @@ var previousSong = function() {
     currentSongIndex = currentAlbum.songs.length - 1;
   }
 
-  // update the previous song's number with a number
-  $('.song-item-number[data-song-number*="' + (previousSongIndex + 1) + '"]').html(previousSongIndex + 1);
+  // hide the pause button on the currently playing song
+  $('.song-item-number[data-song-number*="' + (currentlyPlayingSongNumber) + '"]').parent().find(".ion-pause").parent().toggleClass("hidden");
+  // show the index on the currently playing song
+  $('.song-item-number[data-song-number*="' + (currentlyPlayingSongNumber) + '"]').parent().find(".song-item-number").toggleClass("hidden");
 
-  // set new current song
+  // set new currently playing song
   currentlyPlayingSongNumber = currentSongIndex + 1;
   currentSongFromAlbum = currentAlbum.songs[currentSongIndex];
 
   // set new song's .song-item-number with a pause button
-  $('.song-item-number[data-song-number*="' + currentlyPlayingSongNumber + '"]').html(pauseButtonTemplate);
+  $('.song-item-number[data-song-number*="' + (currentlyPlayingSongNumber) + '"]').parent().find(".song-item-number").toggleClass("hidden");
+  $('.song-item-number[data-song-number*="' + (currentlyPlayingSongNumber) + '"]').parent().find(".ion-pause").parent().toggleClass("hidden");
 
   // update player bar with new song
   updatePlayerBarSong();
 };
 
-var playButtonTemplate = '<a class="album-song-button"><span class="ion-play"></span></a>';
-var pauseButtonTemplate = '<a class="album-song-button"><span class="ion-pause"></span></a>';
 var playerBarPlayButton = '<span class="ion-play"></span>';
 var playerBarPauseButton = '<span class="ion-pause"></span>';
 
