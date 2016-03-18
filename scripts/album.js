@@ -157,56 +157,29 @@ var updatePlayerBarSong = function() {
 };
 
 /*****
-  Summary: Increment the index of the current song in the array
+  Summary: Increment or Decrement the index of the current song in the array
+           Set the play/pause/song number cell appropriately
 
   Input:   None
 
   Return:  None
  ****/
-var nextSong = function() {
+var changeSong = function() {
+  var direction = this.className;
   var currentSongIndex = trackIndex(currentAlbum, currentSongFromAlbum); // returns 0-based index
-  var previousSongIndex = currentSongIndex;
 
-  // if the current song isn't the last one, increment. Otherwise wrap back to the first
-  if (currentSongIndex !== currentAlbum.songs.length - 1) {
-    currentSongIndex++;
+  if (direction === "next") {
+    if (currentSongIndex !== currentAlbum.songs.length - 1) {
+      currentSongIndex++;
+    } else {
+      currentSongIndex = 0;
+    }
   } else {
-    currentSongIndex = 0;
-  }
-
-  // hide the pause button on the currently playing song
-  $('.song-item-number[data-song-number*="' + (currentlyPlayingSongNumber) + '"]').parent().find(".ion-pause").parent().toggleClass("hidden");
-  // show the index on the currently playing song
-  $('.song-item-number[data-song-number*="' + (currentlyPlayingSongNumber) + '"]').parent().find(".song-item-number").toggleClass("hidden");
-
-  // set new currently playing song
-  currentlyPlayingSongNumber = currentSongIndex + 1;
-  currentSongFromAlbum = currentAlbum.songs[currentSongIndex];
-
-  // set new song's .song-item-number with a pause button
-  $('.song-item-number[data-song-number*="' + (currentlyPlayingSongNumber) + '"]').parent().find(".song-item-number").toggleClass("hidden");
-  $('.song-item-number[data-song-number*="' + (currentlyPlayingSongNumber) + '"]').parent().find(".ion-pause").parent().toggleClass("hidden");
-
-  // update player bar with new song
-  updatePlayerBarSong();
-};
-
-/*****
-  Summary: Decrement the index of the current song in the array
-
-  Input:   None
-
-  Return:  None
- ****/
-var previousSong = function() {
-  var currentSongIndex = trackIndex(currentAlbum, currentSongFromAlbum);
-  var previousSongIndex = currentSongIndex;
-
-  // if the current song isn't the first one, decrement. Otherwise wrap back to the last
-  if (currentSongIndex !== 0) {
-    currentSongIndex--;
-  } else {
-    currentSongIndex = currentAlbum.songs.length - 1;
+    if (currentSongIndex !== 0) {
+      currentSongIndex--;
+    } else {
+      currentSongIndex = currentAlbum.songs.length - 1;
+    }
   }
 
   // hide the pause button on the currently playing song
@@ -238,6 +211,6 @@ var $nextButton = $('.main-controls .next');
 
 $(document).ready(function() {
   setCurrentAlbum(albumAllHailWestTexas);
-  $previousButton.click(previousSong);
-  $nextButton.click(nextSong);
+  $previousButton.click(changeSong);
+  $nextButton.click(changeSong);
 });
