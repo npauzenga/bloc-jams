@@ -183,7 +183,6 @@ var updatePlayerBarSong = function() {
  ****/
 var nextSong = function() {
   var currentSongIndex = trackIndex(currentAlbum, currentSongFromAlbum); // returns 0-based index
-  var previousSongIndex = currentSongIndex;
 
   // if the current song isn't the last one, increment. Otherwise wrap back to the first
   if (currentSongIndex !== currentAlbum.songs.length - 1) {
@@ -192,9 +191,15 @@ var nextSong = function() {
     currentSongIndex = 0;
   }
 
-  // hide the pause button on the currently playing song
-  getSongNumberCell(currentlyPlayingSongNumber).parent().find(".ion-pause").parent().toggleClass("hidden");
-  // show the index on the currently playing song
+  if (currentSoundFile.isPaused()) {
+    // hide play button
+    getSongNumberCell(currentlyPlayingSongNumber).parent().find(".ion-play").parent().toggleClass("hidden");
+      } else {
+    // hide the pause button on the currently playing song
+    getSongNumberCell(currentlyPlayingSongNumber).parent().find(".ion-pause").parent().toggleClass("hidden");
+  }
+
+  // show currently playing song's number
   getSongNumberCell(currentlyPlayingSongNumber).parent().find(".song-item-number").toggleClass("hidden");
 
   // set new currently playing song
@@ -220,7 +225,6 @@ var nextSong = function() {
  ****/
 var previousSong = function() {
   var currentSongIndex = trackIndex(currentAlbum, currentSongFromAlbum);
-  var previousSongIndex = currentSongIndex;
 
   // if the current song isn't the first one, decrement. Otherwise wrap back to the last
   if (currentSongIndex !== 0) {
@@ -229,8 +233,14 @@ var previousSong = function() {
     currentSongIndex = currentAlbum.songs.length - 1;
   }
 
-  // hide the pause button on the currently playing song
-  getSongNumberCell(currentlyPlayingSongNumber).parent().find(".ion-pause").parent().toggleClass("hidden");
+  if (currentSoundFile.isPaused()) {
+    // hide play button
+    getSongNumberCell(currentlyPlayingSongNumber).parent().find(".ion-play").parent().toggleClass("hidden");
+      } else {
+    // hide the pause button on the currently playing song
+    getSongNumberCell(currentlyPlayingSongNumber).parent().find(".ion-pause").parent().toggleClass("hidden");
+  }
+
   // show the index on the currently playing song
   getSongNumberCell(currentlyPlayingSongNumber).parent().find(".song-item-number").toggleClass("hidden");
 
@@ -274,6 +284,31 @@ var getSongNumberCell = function(songNumber) {
   return $('[data-song-number="' + songNumber + '"]');
 };
 
+var togglePlayFromPlayerBar = function() {
+  var currentSong = getSongNumberCell(currentlyPlayingSongNumber);
+
+  // if song is paused and play button is clicked
+  if (currentlyPlayingSongNumber && currentSoundFile.isPaused()) {
+    // change song number cell from play to pause
+    currentSong.parent().find(".ion-play").parent().toggleClass("hidden");
+    currentSong.parent().find(".ion-pause").parent().toggleClass("hidden");
+    // change player bar's play button to pause
+    $('.main-controls .play-pause').html(playerBarPauseButton);
+    // play song
+    currentSoundFile.play();
+
+  // if song is playing and pause button is clicked
+  } else if (currentlyPlayingSongNumber) {
+    // change song number cell from pause to play
+    currentSong.parent().find(".ion-play").parent().toggleClass("hidden");
+    currentSong.parent().find(".ion-pause").parent().toggleClass("hidden");
+    // change player bar's pause to play
+    $('.main-controls .play-pause').html(playerBarPlayButton);
+    // pause song
+    currentSoundFile.pause();
+  }
+};
+
 var playerBarPlayButton = '<span class="ion-play"></span>';
 var playerBarPauseButton = '<span class="ion-pause"></span>';
 
@@ -285,9 +320,11 @@ var currentVolume = 80;
 
 var $previousButton = $('.main-controls .previous');
 var $nextButton = $('.main-controls .next');
+var $playerBarPlayButton = $('.main-controls .play-pause');
 
 $(document).ready(function() {
   setCurrentAlbum(albumAllHailWestTexas);
   $previousButton.click(previousSong);
   $nextButton.click(nextSong);
+  $playerBarPlayButton.click(togglePlayFromPlayerBar);
 });
