@@ -27,32 +27,59 @@ var createSongRow = function(songNumber, songName, songLength) {
     var $row = $(this);
     var $songItem = $row.find('.song-item-number');
     var $songItemNumber = parseInt($songItem.attr('data-song-number'));
-
-    // if there isn't a song playing, show the pause button
-    if (currentlyPlayingSongNumber === null) {
-      // show pause button
+    var togglePlayPause = function() {
+      // show the pause button
       $row.find(".ion-pause").parent().toggleClass("hidden");
+      // hide the play button
       $row.find(".ion-play").parent().toggleClass("hidden");
+    };
+
+    // if there isn't a song playing
+    if (currentlyPlayingSongNumber === null) {
+      togglePlayPause();
+      // set the currently playing song to this song
       setSong($songItemNumber);
+      // play the current song
+      currentSoundFile.play();
+      // update the song and play/pause display in the player bar
       updatePlayerBarSong();
 
-    // if the song that's playing is the song we've clicked, change to play button
+    // if the song that's playing is the song we've clicked, we want to pause
     } else if (currentlyPlayingSongNumber === $songItemNumber) {
-      $row.find(".ion-pause").parent().toggleClass("hidden");
-      $row.find(".ion-play").parent().toggleClass("hidden");
-      setSong(null);
-      $('.main-controls .play-pause').html(playerBarPlayButton);
+      if (currentSoundFile.isPaused()) {
+        currentSoundFile.play();
+        togglePlayPause();
+        $('.main-controls .play-pause').html(playerBarPauseButton);
+      } else {
+        currentSoundFile.pause();
+        togglePlayPause();
+        // switch the player bar button to play
+        $('.main-controls .play-pause').html(playerBarPlayButton);
+      }
 
-    // if the song that's playing is not the song we've clicked, change the clicked song's number
-    // to pause button and change the previously playing song's pause button to number
+    // if the song that's playing is not the song we've clicked
     } else if (currentlyPlayingSongNumber !== $songItemNumber) {
-      // get the currently playing song element
+      // find the currently playing song (not the newly clicked song)
       var $currentlyPlayingSongElement = getSongNumberCell(currentlyPlayingSongNumber);
-      $currentlyPlayingSongElement.parent().find(".ion-pause").parent().addClass("hidden");
+
+      // if the current song is paused
+      if (currentSoundFile.isPaused()) {
+        // hide the play button
+        $currentlyPlayingSongElement.parent().find(".ion-play").parent().toggleClass("hidden");
+      } else {
+        // hide the pause button
+        $currentlyPlayingSongElement.parent().find(".ion-pause").parent().toggleClass("hidden");
+      }
+
+      // show the number of the currently playing song
       $currentlyPlayingSongElement.toggleClass("hidden");
-      $row.find(".ion-pause").parent().toggleClass("hidden");
-      $row.find(".ion-play").parent().toggleClass("hidden");
+      // show the pause button on the new song
+      togglePlayPause();
+      // make the newly clicked song the currently playing song
       setSong($songItemNumber);
+      // play currentSoundFile
+      currentSoundFile.play();
+      // show the info in the player song bar
       updatePlayerBarSong();
     }
   };
@@ -173,6 +200,9 @@ var nextSong = function() {
   // set new currently playing song
   setSong(currentSongIndex + 1);
 
+  // play the new song
+  currentSoundFile.play();
+
   // set new song's .song-item-number with a pause button
   getSongNumberCell(currentlyPlayingSongNumber).parent().find(".song-item-number").toggleClass("hidden");
   getSongNumberCell(currentlyPlayingSongNumber).parent().find(".ion-pause").parent().toggleClass("hidden");
@@ -207,6 +237,9 @@ var previousSong = function() {
   // set new currently playing song
   setSong(currentSongIndex + 1);
 
+  // play the new song
+  currentSoundFile.play();
+
   // set new song's .song-item-number with a pause button
   getSongNumberCell(currentlyPlayingSongNumber).parent().find(".song-item-number").toggleClass("hidden");
   getSongNumberCell(currentlyPlayingSongNumber).parent().find(".ion-pause").parent().toggleClass("hidden");
@@ -216,8 +249,25 @@ var previousSong = function() {
 };
 
 var setSong = function(songNumber) {
+  if (currentSoundFile) {
+    // stop the currently playing song
+    currentSoundFile.stop();
+  }
+
   currentlyPlayingSongNumber = songNumber;
   currentSongFromAlbum = currentAlbum.songs[songNumber - 1];
+
+  currentSoundFile = new buzz.sound(currentSongFromAlbum.audioUrl, {
+    formats: ["mp3"],
+    preload: true
+  });
+  setVolume(currentVolume);
+};
+
+var setVolume = function(volume) {
+  if (currentSoundFile) {
+    currentSoundFile.setVolume(volume);
+  }
 };
 
 var getSongNumberCell = function(songNumber) {
@@ -230,6 +280,8 @@ var playerBarPauseButton = '<span class="ion-pause"></span>';
 var currentAlbum = null;
 var currentlyPlayingSongNumber = null;
 var currentSongFromAlbum = null;
+var currentSoundFile = null;
+var currentVolume = 80;
 
 var $previousButton = $('.main-controls .previous');
 var $nextButton = $('.main-controls .next');
