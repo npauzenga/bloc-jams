@@ -9,6 +9,8 @@
   Return:  The completed song row element
  ****/
 var createSongRow = function(songNumber, songName, songLength) {
+  var songLength = filterTimeCode(songLength);
+
   var playButtonTemplate = '<a class="album-song-button hidden"><span class="ion-play"></span></a>';
   var pauseButtonTemplate = '<a class="album-song-button hidden"><span class="ion-pause"></span></a>';
   var songNumberTemplate = '<span class="song-item-number" data-song-number="' + songNumber + '">' + songNumber + '</span>';
@@ -157,6 +159,7 @@ var updateSeekBarWhileSongPlays = function() {
       var seekBarFillRatio = this.getTime() / this.getDuration();
       var $seekBar = $(".seek-control .seek-bar");
 
+      setCurrentTimeInPlayerBar(this.getTime());
       updateSeekPercentage($seekBar, seekBarFillRatio);
     });
   }
@@ -237,6 +240,7 @@ var updatePlayerBarSong = function() {
   var $artistNameHeading = $('.currently-playing .artist-name');
   var $artistSongMobileHeading = $('.currenly-playing .artist-song-mobile');
 
+  setTotalTimeInPlayerBar(currentSongFromAlbum.duration);
   $songNameHeading.text(currentSongFromAlbum.title);
   $artistNameHeading.text(currentAlbum.artist);
   $artistSongMobileHeading.text(currentAlbum.artist + " " + currentSongFromAlbum.title);
@@ -366,6 +370,35 @@ var setVolume = function(volume) {
   }
 
   currentVolume = volume;
+};
+
+// set the text of current-time class to current time in song
+var setCurrentTimeInPlayerBar = function(currentTime) {
+  $(".current-time").text(filterTimeCode(currentTime));
+};
+
+// sets the text of total-time to length of current song
+var setTotalTimeInPlayerBar = function(totalTime) {
+  $(".total-time").text(filterTimeCode(totalTime));
+};
+
+// display the time in the correct formar
+var filterTimeCode = function(timeInSeconds) {
+  var seconds = Math.floor(parseFloat(timeInSeconds));
+  var minutes = 0;
+
+  // if one minute or more have elapsed
+  while (seconds >= 60) {
+    minutes++;
+    seconds -= 60;
+  }
+
+  if (seconds < 10) {
+    seconds = "0" + seconds;
+  }
+
+  var formattedTime = minutes + ":" + seconds;
+  return formattedTime;
 };
 
 var getSongNumberCell = function(songNumber) {
